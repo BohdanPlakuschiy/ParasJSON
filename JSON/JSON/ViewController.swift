@@ -15,7 +15,6 @@ class ViewController: UIViewController {
     var xx = [WelcomeValue]()
     private var timer: Timer?
     
-    var array = ["dea","dadadda", "efsadf"]
     var ident = "Cell"
 
     override func viewDidLoad() {
@@ -25,8 +24,6 @@ class ViewController: UIViewController {
 
         createTableView()
         setupSearchController()
-        
-
     }
         
     func setupSearchController() {
@@ -90,4 +87,4 @@ extension ViewController: UISearchBarDelegate {
      
     }
 }
-//ticker
+
