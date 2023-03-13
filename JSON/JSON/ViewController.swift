@@ -10,6 +10,10 @@ class ViewController: UIViewController {
     
     var tableViewController = UITableView()
     let searchController = UISearchController(searchResultsController: nil)
+    let networkService = NetworkService()
+    var seerchResponce: Welcome? = nil
+    var seerchResponce1: WelcomeValue.CodingKeys? = nil
+    var xx = [WelcomeValue]()
     
     var array = ["dea","dadadda", "efsadf"]
     var ident = "Cell"
@@ -23,41 +27,19 @@ class ViewController: UIViewController {
         setupSearchController()
         
         let urlString = "https://api.exmoney.com/v1/ticker"
-        request(urlString: urlString) { (result) in
+        networkService.request(urlString: urlString) { [weak self] (result) in
             switch result {
-                
-            case .success(let currency): break
+            case .success(let currency):
+                print(currency)
+                self?.xx = Array(currency.values)
+                self?.seerchResponce = currency
+                self?.tableViewController.reloadData()
             case .failure(let error):
-                <#code#>
-            }
+                print("error", error)
             }
         }
-        
-    
-    
-    func request(urlString: String, completion: @escaping (Result<Currency, Error>) -> Void) {
-        guard let url = URL(string: urlString) else { return }
-        URLSession.shared.dataTask(with: url) { (data, responce, error) in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("Some error")
-                    completion(.failure(error))
-                    return
-                }
-                guard let data = data else { return }
-                do {
-                    let currency = try JSONDecoder().decode(Currency.self , from: data)
-                    completion(.success(currency))
-                } catch let jsonError {
-                    print("Failed to decode Json", jsonError)
-                    completion(.failure(jsonError))
-                }
-                
-            }
-        }.resume()
     }
-
-    
+        
     func setupSearchController() {
         self.navigationItem.searchController = searchController
         searchController.searchBar.delegate = self
@@ -83,14 +65,14 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return array.count
+        return xx.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ident, for: indexPath)
         
-        let item = array[indexPath.row]
-        cell.textLabel?.text = item
+        let item = xx[indexPath.row]
+        cell.textLabel?.text = item.buyPrice
         
         return cell
     }
