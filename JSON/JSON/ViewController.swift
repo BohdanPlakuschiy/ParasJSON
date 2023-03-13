@@ -12,8 +12,8 @@ class ViewController: UIViewController {
     let searchController = UISearchController(searchResultsController: nil)
     let networkService = NetworkService()
     var seerchResponce: Welcome? = nil
-    var seerchResponce1: WelcomeValue.CodingKeys? = nil
     var xx = [WelcomeValue]()
+    private var timer: Timer?
     
     var array = ["dea","dadadda", "efsadf"]
     var ident = "Cell"
@@ -26,18 +26,7 @@ class ViewController: UIViewController {
         createTableView()
         setupSearchController()
         
-        let urlString = "https://api.exmoney.com/v1/ticker"
-        networkService.request(urlString: urlString) { [weak self] (result) in
-            switch result {
-            case .success(let currency):
-                print(currency)
-                self?.xx = Array(currency.values)
-                self?.seerchResponce = currency
-                self?.tableViewController.reloadData()
-            case .failure(let error):
-                print("error", error)
-            }
-        }
+
     }
         
     func setupSearchController() {
@@ -71,8 +60,8 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ident, for: indexPath)
         
-        let item = xx[indexPath.row]
-        cell.textLabel?.text = item.buyPrice
+        let item = xx[indexPath.row].self
+        cell.textLabel?.text = item.avg
         
         return cell
     }
@@ -83,6 +72,22 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: -
 extension ViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print(searchBar)
+        let urlString = "https://api.exmoney.com/v1/ticker\(searchText)"
+        
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false, block: { (_) in
+            self.networkService.request(urlString: urlString) { [weak self] (result) in
+                switch result {
+                case .success(let currency):
+                    self?.xx = Array(currency.values)
+                    self?.seerchResponce = currency
+                    self?.tableViewController.reloadData()
+                case .failure(let error):
+                    print("error", error)
+                }
+            }
+        })
+     
     }
 }
+//ticker
